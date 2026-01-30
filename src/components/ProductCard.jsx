@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MapPin } from 'lucide-react';
+import { Truck } from 'lucide-react';
 import API_URL from '../config/api';
 
 const ProductCard = ({ product }) => {
