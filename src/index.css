@@ -1,0 +1,109 @@
+:root {
+  --primary-red: #ff204e;
+  --secondary-red: #d3103e;
+  --bg-color: #fcfcfc;
+  --text-main: #1a1a1a;
+  --text-light: #666;
+  --white: #ffffff;
+  --gray-light: #f4f4f4;
+  --border-radius: 8px;
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-hover: 0 4px 12px rgba(255, 32, 78, 0.15);
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --max-width: 1200px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+}
+
+ul {
+  list-style: none;
+}
+
+/* Utilities */
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.btn-primary {
+  background-color: var(--primary-red);
+  color: var(--white);
+  box-shadow: 0 4px 6px rgba(255, 32, 78, 0.2);
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-red);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(255, 32, 78, 0.3);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--primary-red);
+  color: var(--primary-red);
+}
+
+.btn-outline:hover {
+  background: var(--primary-red);
+  color: var(--white);
+}
+
+/* Forms */
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+  background: var(--white);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary-red);
+  box-shadow: 0 0 0 3px rgba(255, 32, 78, 0.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
