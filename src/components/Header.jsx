@@ -3,13 +3,14 @@ import { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { LogOut, LayoutDashboard, User, LogIn, UserPlus } from 'lucide-react';
 import logo from '../assets/logo.png';
+import API_URL from '../config/api';
 
 const Header = () => {
     const { user, logout } = useContext(AuthContext);
 
     // Placeholder image service for avatar based on username, or real avatar if available
     const avatarUrl = user && user.avatar
-        ? `http://localhost:5000${user.avatar}`
+        ? `${API_URL}${user.avatar}`
         : (user ? `https://ui-avatars.com/api/?name=${user.username}&background=random&color=fff` : '');
 
     return (

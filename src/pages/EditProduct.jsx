@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { Save, Upload, X, Image as ImageIcon, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import Spinner from '../components/Spinner';
+import API_URL from '../config/api';
 
 const EditProduct = () => {
     const { id } = useParams();
@@ -31,11 +32,11 @@ const EditProduct = () => {
         const fetchData = async () => {
             try {
                 // Fetch categories first
-                const catRes = await axios.get('http://localhost:5000/api/categories');
+                const catRes = await axios.get(`${API_URL}/api/categories`);
                 setCategories(catRes.data);
 
                 // Fetch product
-                const res = await axios.get(`http://localhost:5000/api/products/${id}`);
+                const res = await axios.get(`${API_URL}/api/products/${id}`);
                 setFormData({
                     name: res.data.name,
                     description: res.data.description || '',
@@ -48,7 +49,7 @@ const EditProduct = () => {
                 const loadedItems = (res.data.images || []).map((img, i) => ({
                     id: `existing-${i}-${Date.now()}`,
                     type: 'existing',
-                    url: `http://localhost:5000${img}`, // Full URL for display
+                    url: `${API_URL}${img}`, // Full URL for display
                     serverPath: img // Path needed for backend
                 }));
                 setItems(loadedItems);
@@ -144,7 +145,7 @@ const EditProduct = () => {
         data.append('categoryId', formData.categoryId);
 
         try {
-            await axios.put(`http://localhost:5000/api/products/${id}`, data, {
+            await axios.put(`${API_URL}/api/products/${id}`, data, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

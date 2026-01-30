@@ -5,6 +5,7 @@ import axios from 'axios';
 import { User, Mail, Lock, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import Spinner from '../components/Spinner';
+import API_URL from '../config/api';
 
 const Register = () => {
     const [formData, setFormData] = useState({ username: '', email: '', password: '' });
@@ -16,7 +17,7 @@ const Register = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/register', formData);
+            const res = await axios.post(`${API_URL}/api/auth/register`, formData);
             login(res.data.token);
             toast.success('¡Registro exitoso! Bienvenido a Kemazon.ar');
             navigate('/');

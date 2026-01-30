@@ -1,9 +1,10 @@
-import { Truck } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { MapPin } from 'lucide-react';
+import API_URL from '../config/api';
 
 const ProductCard = ({ product }) => {
     const imageUrl = product.images && product.images.length > 0
-        ? `http://localhost:5000${product.images[0]}`
+        ? `${API_URL}${product.images[0]}`
         : 'https://via.placeholder.com/300?text=No+Image';
 
     return (

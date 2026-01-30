@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Trash2, Edit, PlusCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import Spinner from '../components/Spinner';
+import API_URL from '../config/api';
 
 const MyProducts = () => {
     const { user } = useContext(AuthContext);
@@ -15,7 +16,7 @@ const MyProducts = () => {
         const fetchUserProducts = async () => {
             if (user) {
                 try {
-                    const res = await axios.get(`http://localhost:5000/api/products/user/${user.id}`);
+                    const res = await axios.get(`${API_URL}/api/products/user/${user.id}`);
                     setProducts(res.data);
                 } catch (err) {
                     console.error('Error fetching user products:', err);
@@ -32,7 +33,7 @@ const MyProducts = () => {
     const handleDelete = async (id) => {
         if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
             try {
-                await axios.delete(`http://localhost:5000/api/products/${id}`);
+                await axios.delete(`${API_URL}/api/products/${id}`);
                 setProducts(products.filter(product => product.id !== id));
                 toast.success('Producto eliminado correctamente');
             } catch (err) {
@@ -78,7 +79,7 @@ const MyProducts = () => {
                                 <tr key={product.id} style={{ borderBottom: '1px solid #eee' }}>
                                     <td style={{ padding: '1rem' }}>
                                         <img
-                                            src={product.images && product.images.length > 0 ? `http://localhost:5000${product.images[0]}` : 'https://via.placeholder.com/50'}
+                                            src={product.images && product.images.length > 0 ? `${API_URL}${product.images[0]}` : 'https://via.placeholder.com/50'}
                                             alt={product.name}
                                             style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
                                         />

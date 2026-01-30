@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import API_URL from '../config/api';
 
 export const AuthContext = createContext();
 
@@ -19,7 +20,7 @@ export const AuthProvider = ({ children }) => {
 
                 // Fetch fresh data
                 try {
-                    const res = await axios.get(`http://localhost:5000/api/users/${parsedUser.id}`);
+                    const res = await axios.get(`${API_URL}/api/users/${parsedUser.id}`);
                     if (res.data) {
                         setUser(res.data);
                         localStorage.setItem('user', JSON.stringify(res.data));

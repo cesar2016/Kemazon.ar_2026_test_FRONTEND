@@ -2,8 +2,9 @@ import { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Upload, X, Image as ImageIcon, Star } from 'lucide-react';
+import { Plus, Image as ImageIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
+import API_URL from '../config/api';
 import Spinner from '../components/Spinner';
 
 const CreateProduct = () => {
@@ -24,7 +25,7 @@ const CreateProduct = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/categories');
+                const res = await axios.get(`${API_URL}/api/categories`);
                 setCategories(res.data);
             } catch (err) {
                 console.error('Error fetching categories:', err);
@@ -129,7 +130,7 @@ const CreateProduct = () => {
                 data.append('images', image);
             });
 
-            await axios.post('http://localhost:5000/api/products', data, {
+            await axios.post(`${API_URL}/api/products`, data, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

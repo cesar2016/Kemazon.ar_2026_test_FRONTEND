@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import Spinner from '../components/Spinner';
+import API_URL from '../config/api';
 
 const Login = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
@@ -17,7 +18,7 @@ const Login = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', formData);
+            const res = await axios.post(`${API_URL}/api/auth/login`, formData);
             // Bug fix: Pass both token AND user data to login context
             login(res.data.token, res.data.user);
             toast.success(`Bienvenido de nuevo, ${res.data.user.username}!`);

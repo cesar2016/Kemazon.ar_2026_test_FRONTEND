@@ -1,8 +1,9 @@
 import { useState, useEffect, useContext } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Share2 } from 'react-router-dom';
 import axios from 'axios';
-import { Truck, ShieldCheck, Trophy, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, MessageCircle, Send } from 'lucide-react';
 import Spinner from '../components/Spinner';
+import API_URL from '../config/api';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'sonner';
 
@@ -15,7 +16,7 @@ const ProductDetail = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/products/${id}`);
+                const res = await axios.get(`${API_URL}/api/products/${id}`);
                 setProduct(res.data);
                 if (res.data.images && res.data.images.length > 0) {
                     setSelectedImage(res.data.images[0]);
@@ -65,7 +66,7 @@ const ProductDetail = () => {
                         justifyContent: 'center'
                     }}>
                         <img
-                            src={selectedImage ? `http://localhost:5000${selectedImage}` : 'https://via.placeholder.com/500?text=No+Image'}
+                            src={selectedImage ? `${API_URL}${selectedImage}` : 'https://via.placeholder.com/500?text=No+Image'}
                             alt={product.name}
                             style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                         />
@@ -86,7 +87,7 @@ const ProductDetail = () => {
                                     }}
                                 >
                                     <img
-                                        src={`http://localhost:5000${img}`}
+                                        src={`${API_URL}${img}`}
                                         alt={`Thumb ${index}`}
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                     />
@@ -211,7 +212,7 @@ const QuestionsSection = ({ productId, productUserId }) => {
     // Refresh questions
     const fetchQuestions = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/questions/${productId}`);
+            const res = await axios.get(`${API_URL}/api/questions/${productId}`);
             setQuestions(res.data);
         } catch (err) {
             console.error(err);
@@ -232,7 +233,7 @@ const QuestionsSection = ({ productId, productUserId }) => {
         }
 
         try {
-            await axios.post('http://localhost:5000/api/questions', {
+            await axios.post(`${API_URL}/api/questions`, {
                 productId,
                 content: newQuestion
             }, {
@@ -253,7 +254,7 @@ const QuestionsSection = ({ productId, productUserId }) => {
         const token = localStorage.getItem('token');
 
         try {
-            await axios.put(`http://localhost:5000/api/questions/${questionId}/answer`, {
+            await axios.put(`${API_URL}/api/questions/${questionId}/answer`, {
                 answer: answerText
             }, {
                 headers: {
