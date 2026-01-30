@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
-import { useParams, Share2 } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { ShieldCheck, Truck, RotateCcw, MessageCircle, Send } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, MessageCircle, Send, Share2 } from 'lucide-react';
 import Spinner from '../components/Spinner';
 import API_URL from '../config/api';
 import { AuthContext } from '../context/AuthContext';
