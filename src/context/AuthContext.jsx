@@ -20,15 +20,26 @@ export const AuthProvider = ({ children }) => {
 
                 // Fetch fresh data
                 try {
-                    const res = await axios.get(`${API_URL}/api/users/${parsedUser.id}`);
+                    const res = await axios.get(`${API_URL}/api/users/${parsedUser.id}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
                     if (res.data) {
                         setUser(res.data);
                         localStorage.setItem('user', JSON.stringify(res.data));
                     }
                 } catch (err) {
                     console.error('Error fetching fresh user data:', err);
-                    // If error (e.g. 404), maybe logout? For now keep stored data or do nothing.
+                    // If token is invalid (401/403), logout to clean state
+                    if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        setUser(null);
+                    }
                 }
+            } else {
+                setUser(null);
             }
             setLoading(false);
         };
