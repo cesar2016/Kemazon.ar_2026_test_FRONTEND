@@ -28,7 +28,7 @@ const Home = () => {
         <div className="container" style={{ padding: '4rem 0' }}>
             <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                 <h1 className="fade-in" style={{ fontSize: '3rem', color: 'var(--primary-red)', marginBottom: '1rem' }}>
-                    Bienvenido a Kemazon.ar
+                    Bienvenido a Kemazon.ar - "DEVELOP"
                 </h1>
                 <p className="fade-in" style={{ fontSize: '1.2rem', marginBottom: '2rem', color: 'var(--text-light)' }}>
                     Compra y vende productos con estilo minimalista.
