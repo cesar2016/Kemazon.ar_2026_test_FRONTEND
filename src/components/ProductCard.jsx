@@ -7,8 +7,15 @@ const ProductCard = ({ product }) => {
         ? `${API_URL}${product.images[0]}`
         : 'https://via.placeholder.com/300?text=No+Image';
 
+    const createSlug = (name) => {
+        return name
+            .toLowerCase()
+            .replace(/ /g, '-')
+            .replace(/[^\w-]+/g, '');
+    };
+
     return (
-        <Link to={`/product/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <Link to={`/product/${product.id}-${createSlug(product.name)}`} style={{ textDecoration: 'none', color: 'inherit' }}>
             <div style={{
                 background: 'white',
                 borderRadius: '8px',

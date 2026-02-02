@@ -22,7 +22,7 @@ function App() {
         <main style={{ flex: 1 }}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/product/:idSlug" element={<ProductDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />

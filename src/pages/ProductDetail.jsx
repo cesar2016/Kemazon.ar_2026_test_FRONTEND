@@ -8,7 +8,8 @@ import { AuthContext } from '../context/AuthContext';
 import { toast } from 'sonner';
 
 const ProductDetail = () => {
-    const { id } = useParams();
+    const { idSlug } = useParams();
+    const id = idSlug ? idSlug.split('-')[0] : null;
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -135,7 +136,8 @@ const ProductDetail = () => {
                             {/* WhatsApp */}
                             <button
                                 onClick={() => {
-                                    const text = `¡Mira este producto en Kemazon! ${window.location.href}`;
+                                    const shareUrl = `${API_URL}/social/share/${id}`;
+                                    const text = `¡Mira este producto en Kemazon! ${shareUrl}`;
                                     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
                                 }}
                                 title="Compartir en WhatsApp"
@@ -147,7 +149,8 @@ const ProductDetail = () => {
                             {/* Facebook */}
                             <button
                                 onClick={() => {
-                                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
+                                    const shareUrl = `${API_URL}/social/share/${id}`;
+                                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
                                 }}
                                 title="Compartir en Facebook"
                                 style={{ width: '40px', height: '40px', borderRadius: '50%', border: 'none', background: '#1877F2', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
@@ -158,8 +161,9 @@ const ProductDetail = () => {
                             {/* Instagram (Copy Link) */}
                             <button
                                 onClick={() => {
-                                    navigator.clipboard.writeText(window.location.href);
-                                    toast.success('Enlace copiado para Instagram');
+                                    const shareUrl = `${API_URL}/social/share/${id}`;
+                                    navigator.clipboard.writeText(shareUrl);
+                                    toast.success('Enlace viral copiado para Instagram');
                                     window.open('https://instagram.com', '_blank');
                                 }}
                                 title="Copiar enlace para Instagram"
@@ -171,8 +175,9 @@ const ProductDetail = () => {
                             {/* TikTok (Copy Link) */}
                             <button
                                 onClick={() => {
-                                    navigator.clipboard.writeText(window.location.href);
-                                    toast.success('Enlace copiado para TikTok');
+                                    const shareUrl = `${API_URL}/social/share/${id}`;
+                                    navigator.clipboard.writeText(shareUrl);
+                                    toast.success('Enlace viral copiado para TikTok');
                                     window.open('https://tiktok.com', '_blank');
                                 }}
                                 title="Copiar enlace para TikTok"
