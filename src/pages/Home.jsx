@@ -28,10 +28,10 @@ const Home = () => {
         <div className="container" style={{ padding: '4rem 0' }}>
             <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                 <h1 className="fade-in" style={{ fontSize: '3rem', color: 'var(--primary-red)', marginBottom: '1rem' }}>
-                    Bienvenido a Kemazon.ar - "DEVELOP"
+                    Bienvenido a Kemazon.ar
                 </h1>
                 <p className="fade-in" style={{ fontSize: '1.2rem', marginBottom: '2rem', color: 'var(--text-light)' }}>
-                    Compra y vende productos con estilo minimalista.
+                    Compra y vende lo que quieras.
                 </p>
                 <div className="fade-in" style={{ animationDelay: '0.2s' }}>
                     <Link to="/register" className="btn btn-primary" style={{ marginRight: '1rem' }}>Comenzar a vender</Link>
