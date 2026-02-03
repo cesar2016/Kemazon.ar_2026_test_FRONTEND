@@ -8,19 +8,29 @@ import Spinner from '../components/Spinner';
 import API_URL from '../config/api';
 
 const Register = () => {
-    const [formData, setFormData] = useState({ username: '', email: '', password: '' });
+    const [formData, setFormData] = useState({ username: '', email: '', password: '', confirmPassword: '' });
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (formData.password !== formData.confirmPassword) {
+            toast.error('Las contraseñas no coinciden');
+            return;
+        }
+
         setLoading(true);
         try {
-            const res = await axios.post(`${API_URL}/api/auth/register`, formData);
-            login(res.data.token);
-            toast.success('¡Registro exitoso! Bienvenido a Kemazon.ar');
-            navigate('/');
+            await axios.post(`${API_URL}/api/auth/register`, {
+                username: formData.username,
+                email: formData.email,
+                password: formData.password
+            });
+            // Do NOT login automatically. Redirect or show message.
+            toast.success('¡Registro exitoso! Por favor verifica tu correo para activar tu cuenta.');
+            navigate('/login'); // Redirect to login page
         } catch (err) {
             console.error(err.response?.data);
             toast.error(err.response?.data?.msg || 'Error al registrarse');
@@ -61,7 +71,7 @@ const Register = () => {
                         />
                     </div>
                 </div>
-                <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ marginBottom: '1rem' }}>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Contraseña</label>
                     <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #ddd', borderRadius: '4px', padding: '0 10px', background: '#fff' }}>
                         <Lock size={18} color="#666" />
@@ -75,6 +85,20 @@ const Register = () => {
                         />
                     </div>
                 </div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Confirmar Contraseña</label>
+                    <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #ddd', borderRadius: '4px', padding: '0 10px', background: '#fff' }}>
+                        <Lock size={18} color="#666" />
+                        <input
+                            type="password"
+                            value={formData.confirmPassword}
+                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                            required
+                            placeholder="******"
+                            style={{ border: 'none', outline: 'none', width: '100%', padding: '10px' }}
+                        />
+                    </div>
+                </div>
                 <button type="submit" className="btn btn-primary" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }} disabled={loading}>
                     {loading ? <Spinner size={20} color="#fff" /> : <><UserPlus size={18} /> Registrarse</>}
                 </button>
@@ -82,5 +106,6 @@ const Register = () => {
         </div>
     );
 };
+
 
 export default Register;

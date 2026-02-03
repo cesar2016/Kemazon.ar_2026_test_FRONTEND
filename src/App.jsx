@@ -4,6 +4,7 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import VerifyAccount from './pages/VerifyAccount'; // New Import
 import CreateProduct from './pages/CreateProduct';
 import ProductDetail from './pages/ProductDetail';
 import EditProduct from './pages/EditProduct';
@@ -25,6 +26,7 @@ function App() {
             <Route path="/product/:idSlug" element={<ProductDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/verify/:token" element={<VerifyAccount />} /> {/* New Route */}
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/create-product" element={<CreateProduct />} />
             <Route path="/my-products" element={<MyProducts />} />
