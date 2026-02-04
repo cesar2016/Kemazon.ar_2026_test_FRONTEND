@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
+import { CartContext } from '../context/CartContext';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { ShieldCheck, Truck, RotateCcw, MessageCircle, Send, Share2, ArrowLeft, Trophy } from 'lucide-react';
@@ -6,8 +7,10 @@ import Spinner from '../components/Spinner';
 import API_URL from '../config/api';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'sonner';
+import ArrangeWithSeller from '../components/ArrangeWithSeller';
 
 const ProductDetail = () => {
+    const { addToCart } = useContext(CartContext);
     const { idSlug } = useParams();
     const id = idSlug ? idSlug.split('-')[0] : null;
     const [product, setProduct] = useState(null);
@@ -50,7 +53,7 @@ const ProductDetail = () => {
                 <ArrowLeft size={16} /> Volver al listado
             </Link>
 
-            <div style={{ background: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '2rem', display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+            <div className="grid-responsive" style={{ background: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '2rem', display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
 
                 {/* Images Section */}
                 <div>
@@ -122,12 +125,51 @@ const ProductDetail = () => {
                         MercadoPuntos
                     </p>
 
-                    <button className="btn btn-primary" style={{ width: '100%', marginBottom: '1rem', padding: '1rem' }}>
-                        Comprar ahora
-                    </button>
-                    <button className="btn btn-outline" style={{ width: '100%', padding: '1rem', background: '#e6f7ee', border: 'none', color: '#00a650' }}>
+                    {/* Payment Options */}
+                    {product.user?.paymentMethods?.some(pm => pm.provider === 'MERCADOPAGO') ? (
+                        <button
+                            onClick={async () => {
+                                if (!user) {
+                                    toast.error('Inicia sesión para comprar');
+                                    return;
+                                }
+                                try {
+                                    const token = localStorage.getItem('token');
+                                    const res = await axios.post(`${API_URL}/api/payment/create_preference`, {
+                                        productId: product.id,
+                                        title: product.name,
+                                        price: product.price,
+                                        quantity: 1,
+                                        picture_url: product.images && product.images.length > 0 ? `${API_URL}${product.images[0]}` : ''
+                                    }, {
+                                        headers: { Authorization: `Bearer ${token}` }
+                                    });
+                                    window.location.href = res.data.init_point;
+                                } catch (error) {
+                                    console.error(error);
+                                    if (error.response && error.response.status === 400) {
+                                        toast.error(error.response.data.msg || 'Error al iniciar el pago');
+                                    } else {
+                                        toast.error('Error al iniciar el pago');
+                                    }
+                                }
+                            }}
+                            className="btn btn-primary"
+                            style={{ width: '100%', marginBottom: '1rem', padding: '1rem', backgroundColor: '#009ee3', borderColor: '#009ee3' }}
+                        >
+                            Comprar con MercadoPago
+                        </button>
+                    ) : null}
+
+                    <button
+                        onClick={() => addToCart(product)}
+                        className="btn btn-outline"
+                        style={{ width: '100%', padding: '1rem', background: '#e6f7ee', border: 'none', color: '#00a650', marginBottom: '1rem' }}
+                    >
                         Agregar al carrito
                     </button>
+
+                    <ArrangeWithSeller product={product} />
 
                     {/* Social Share */}
                     <div style={{ marginTop: '2rem' }}>

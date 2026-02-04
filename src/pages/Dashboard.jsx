@@ -13,12 +13,21 @@ const Dashboard = () => {
                 <p style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Hola, <strong>{user?.username || 'Usuario'}</strong></p>
                 <p>Bienvenido a tu panel de control.</p>
 
-                <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
+                <div className="btn-group-mobile" style={{ marginTop: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                     <Link to="/create-product" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
                         <PlusCircle size={20} /> Nuevo Producto
                     </Link>
                     <Link to="/my-products" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
                         <Package size={20} /> Ver Mis Productos
+                    </Link>
+                    <Link to="/my-purchases" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+                        <Package size={20} /> Mis Compras
+                    </Link>
+                    <Link to="/my-sales" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+                        <Package size={20} /> Mis Ventas
+                    </Link>
+                    <Link to="/profile" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+                        Editar Perfil
                     </Link>
                     <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <MessageSquare size={20} /> Mensajes

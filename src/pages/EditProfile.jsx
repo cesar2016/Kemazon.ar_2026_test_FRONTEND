@@ -5,6 +5,7 @@ import { User, MapPin, Mail, Phone, Camera, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import Spinner from '../components/Spinner';
 import API_URL from '../config/api';
+import PaymentSettings from '../components/PaymentSettings';
 
 const EditProfile = () => {
     const { user, login } = useContext(AuthContext); // Re-login to update context if needed
@@ -231,6 +232,7 @@ const EditProfile = () => {
                     {submitting ? <Spinner size={20} color="#fff" /> : <><Save size={20} /> Guardar Cambios</>}
                 </button>
 
+                <PaymentSettings />
             </form>
         </div>
     );

@@ -211,3 +211,53 @@ textarea:focus {
     transform: rotate(360deg);
   }
 }
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 15px;
+  }
+
+  .page-header {
+    font-size: 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .grid-responsive {
+    grid-template-columns: 1fr !important;
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .show-mobile {
+    display: block !important;
+  }
+
+  h1 {
+    font-size: 1.8rem !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+  }
+
+  /* Stack buttons in mobile */
+  .btn-group-mobile {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-group-mobile .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .show-mobile {
+    display: none !important;
+  }
+}
