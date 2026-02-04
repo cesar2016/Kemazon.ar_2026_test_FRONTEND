@@ -27,7 +27,7 @@ const EditProfile = () => {
         const fetchUser = async () => {
             if (!user) return;
             try {
-                const res = await axios.get(`${API_URL} /api/users / ${user.id} `);
+                const res = await axios.get(`${API_URL}/api/users/${user.id}`);
                 const u = res.data;
                 setFormData({
                     username: u.username,
@@ -39,7 +39,7 @@ const EditProfile = () => {
                     whatsapp: u.whatsapp || '',
                 });
                 if (u.avatar) {
-                    setAvatarPreview(`${API_URL}${u.avatar} `);
+                    setAvatarPreview(`${API_URL}${u.avatar}`);
                 }
             } catch (err) {
                 console.error(err);
@@ -76,7 +76,7 @@ const EditProfile = () => {
         }
 
         try {
-            const res = await axios.put(`${API_URL} /api/users / ${user.id} `, data, {
+            const res = await axios.put(`${API_URL}/api/users/${user.id}`, data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 

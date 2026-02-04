@@ -11,6 +11,8 @@ import EditProduct from './pages/EditProduct';
 import MyProducts from './pages/MyProducts';
 import Dashboard from './pages/Dashboard';
 import EditProfile from './pages/EditProfile';
+import AdminPanel from './pages/AdminPanel'; // New Import
+import ProtectedAdminRoute from './components/ProtectedAdminRoute'; // New Import
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'sonner';
 
@@ -32,6 +34,11 @@ function App() {
             <Route path="/my-products" element={<MyProducts />} />
             <Route path="/edit-product/:id" element={<EditProduct />} />
             <Route path="/profile" element={<EditProfile />} />
+
+            {/* Admin Routes */}
+            <Route element={<ProtectedAdminRoute />}>
+              <Route path="/admin" element={<AdminPanel />} />
+            </Route>
           </Routes>
         </main>
         <Footer />
