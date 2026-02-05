@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { CartContext } from '../context/CartContext';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ShieldCheck, Truck, RotateCcw, MessageCircle, Send, Share2, ArrowLeft, Trophy, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, MessageCircle, Send, Share2, ArrowLeft, Trophy, X, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import Spinner from '../components/Spinner';
 import API_URL from '../config/api';
 import { AuthContext } from '../context/AuthContext';
@@ -56,6 +56,34 @@ const ProductDetail = () => {
 
         fetchProduct();
     }, [id, navigate]);
+
+    // Visit Counter Logic
+    useEffect(() => {
+        if (!id) return;
+
+        const timer = setTimeout(async () => {
+            try {
+                // Get or create Guest ID
+                let guestId = localStorage.getItem('kemazon_guest_id');
+                if (!guestId) {
+                    guestId = crypto.randomUUID();
+                    localStorage.setItem('kemazon_guest_id', guestId);
+                }
+
+                // Call API
+                const token = localStorage.getItem('token');
+                const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+                await axios.post(`${API_URL}/api/products/${id}/visit`, { guestId }, { headers });
+                // console.log('Visit recorded');
+
+            } catch (err) {
+                console.error('Error recording visit:', err);
+            }
+        }, 3000); // 3 seconds
+
+        return () => clearTimeout(timer);
+    }, [id]);
 
     const handleQuestionSubmit = async (e) => {
         e.preventDefault();
@@ -239,6 +267,20 @@ const ProductDetail = () => {
                             <span>MercadoPuntos</span>
                         </div>
                     </div>
+
+                    {/* Visit Stats */}
+                    {product.stats && (
+                        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #eee', fontSize: '0.9rem', color: '#666' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '5px' }}>
+                                <Eye size={18} />
+                                <span style={{ fontWeight: 'bold' }}>{product.stats.total} Visitas</span>
+                            </div>
+                            <div style={{ paddingLeft: '23px', fontSize: '0.8rem' }}>
+                                {product.stats.users} usuarios registrados <br />
+                                {product.stats.guests} visitantes
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

@@ -9,7 +9,12 @@ import API_URL from '../config/api';
 const Cart = () => {
     const { cart, removeFromCart, updateQuantity, clearCart } = useContext(CartContext); // Added updateQuantity
 
-    const total = cart.reduce((acc, item) => acc + (parseFloat(item.price) * (item.quantity || 1)), 0); // Updated total calculation
+    const total = cart.reduce((acc, item) => acc + (parseFloat(item.price) * (item.quantity || 1)), 0);
+
+    const getImageSrc = (path) => {
+        if (!path) return 'https://via.placeholder.com/100';
+        return path.startsWith('http') ? path : `${API_URL}${path}`;
+    };
 
     const handleCheckout = async () => {
         try {
@@ -31,7 +36,7 @@ const Cart = () => {
                     title: item.name,
                     price: item.price,
                     quantity: item.quantity || 1,
-                    picture_url: item.images && item.images.length > 0 ? `${API_URL}${item.images[0]}` : '',
+                    picture_url: item.images && item.images.length > 0 ? getImageSrc(item.images[0]) : '',
                     productId: item.id
                 }))
             }, {
@@ -65,7 +70,7 @@ const Cart = () => {
                     {cart.map((item, index) => (
                         <div key={`${item.id}-${index}`} style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid #eee', paddingBottom: '1rem', marginBottom: '1rem' }}>
                             <img
-                                src={item.images && item.images.length > 0 ? `${API_URL}${item.images[0]}` : 'https://via.placeholder.com/100'}
+                                src={item.images && item.images.length > 0 ? getImageSrc(item.images[0]) : 'https://via.placeholder.com/100'}
                                 alt={item.name}
                                 style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }}
                             />
