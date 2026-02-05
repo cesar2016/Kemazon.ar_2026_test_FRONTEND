@@ -29,9 +29,9 @@ const Dashboard = () => {
                     <Link to="/profile" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
                         Editar Perfil
                     </Link>
-                    <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Link to="/messages" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
                         <MessageSquare size={20} /> Mensajes
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>

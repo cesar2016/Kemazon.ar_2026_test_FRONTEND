@@ -14,6 +14,7 @@ import EditProfile from './pages/EditProfile';
 import Cart from './pages/Cart'; // New Import
 import Success from './pages/Success';
 import MyPurchases from './pages/MyPurchases';
+import Messages from './pages/Messages';
 import MySales from './pages/MySales';
 import AdminPanel from './pages/AdminPanel'; // New Import
 import ProtectedAdminRoute from './components/ProtectedAdminRoute'; // New Import
@@ -46,6 +47,7 @@ function App() {
               <Route path="/pending" element={<Success />} />
               <Route path="/my-purchases" element={<MyPurchases />} />
               <Route path="/my-sales" element={<MySales />} />
+              <Route path="/messages" element={<Messages />} />
 
               {/* Admin Routes */}
               <Route element={<ProtectedAdminRoute />}>

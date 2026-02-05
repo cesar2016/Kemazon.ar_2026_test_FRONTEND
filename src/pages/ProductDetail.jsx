@@ -230,19 +230,20 @@ const ProductDetail = () => {
                         </div>
                     </div>
 
-                    <div style={{ marginTop: '3rem' }}>
-                        <h3 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Descripción</h3>
-                        <p style={{ color: '#666', whiteSpace: 'pre-line', lineHeight: '1.6' }}>
-                            {product.description || 'Sin descripción.'}
-                        </p>
-                    </div>
-
-                    <hr style={{ margin: '2rem 0', border: 'none', borderTop: '1px solid #eee' }} />
-
-                    <QuestionsSection productId={id} productUserId={product.userId} />
-
                     <p style={{ color: '#999', fontSize: '0.9rem', marginTop: '2rem' }}>Vendido por: <strong>{product.user?.username || 'Vendedor'}</strong></p>
                 </div>
+            </div>
+
+            {/* Full Width Sections */}
+            <div style={{ marginTop: '3rem', background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>Descripción</h3>
+                <p style={{ color: '#666', whiteSpace: 'pre-line', lineHeight: '1.6', fontSize: '1.1rem' }}>
+                    {product.description || 'Sin descripción.'}
+                </p>
+
+                <hr style={{ margin: '3rem 0', border: 'none', borderTop: '1px solid #eee' }} />
+
+                <QuestionsSection productId={id} productUserId={product.userId} />
             </div>
         </div>
     );
