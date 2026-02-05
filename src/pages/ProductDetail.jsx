@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { CartContext } from '../context/CartContext';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ShieldCheck, Truck, RotateCcw, MessageCircle, Send, Share2, ArrowLeft, Trophy, X, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, MessageCircle, Send, Share2, ArrowLeft, Trophy, X, ChevronLeft, ChevronRight, Eye, Heart, User } from 'lucide-react';
 import Spinner from '../components/Spinner';
 import API_URL from '../config/api';
 import { AuthContext } from '../context/AuthContext';
@@ -28,18 +28,41 @@ const ProductDetail = () => {
     const [questions, setQuestions] = useState([]);
     const [showArrangeModal, setShowArrangeModal] = useState(false);
 
+    // Like State
+    const [liked, setLiked] = useState(false);
+    const [likesCount, setLikesCount] = useState(0);
+
+    // Likes Modal State
+    const [showLikesModal, setShowLikesModal] = useState(false);
+    const [likesList, setLikesList] = useState([]);
+    const [loadingLikes, setLoadingLikes] = useState(false);
+
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const res = await axios.get(`${API_URL}/api/products/${id}`);
+                // Get guestId and token
+                const guestId = localStorage.getItem('kemazon_guest_id');
+                const token = localStorage.getItem('token');
+                const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+                const res = await axios.get(`${API_URL}/api/products/${id}`, {
+                    headers,
+                    params: { guestId }
+                });
                 setProduct(res.data);
                 if (res.data.images && res.data.images.length > 0) {
                     setSelectedImage(res.data.images[0]);
                 }
 
+                // Initialize Like State
+                if (res.data.stats && res.data.stats.likes) {
+                    setLiked(res.data.stats.likes.isLiked);
+                    setLikesCount(res.data.stats.likes.total);
+                }
+
                 // Fetch questions
                 try {
-                    const qRes = await axios.get(`${API_URL}/api/questions/product/${id}`);
+                    const qRes = await axios.get(`${API_URL}/api/questions/${id}`);
                     setQuestions(qRes.data);
                 } catch (qErr) {
                     console.error('Error fetching questions');
@@ -85,6 +108,50 @@ const ProductDetail = () => {
         return () => clearTimeout(timer);
     }, [id]);
 
+    const handleLike = async () => {
+        if (!id) return;
+
+        // Optimistic UI update
+        const newLikedState = !liked;
+        setLiked(newLikedState);
+        setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
+
+        try {
+            // Get Guest ID
+            let guestId = localStorage.getItem('kemazon_guest_id');
+            if (!guestId) {
+                guestId = crypto.randomUUID();
+                localStorage.setItem('kemazon_guest_id', guestId);
+            }
+
+            const token = localStorage.getItem('token');
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+            await axios.post(`${API_URL}/api/products/${id}/like`, { guestId }, { headers });
+
+        } catch (err) {
+            console.error('Error toggling like:', err);
+            // Revert on error
+            setLiked(!newLikedState);
+            setLikesCount(prev => !newLikedState ? prev + 1 : prev - 1);
+            toast.error('Error al dar Me Gusta');
+        }
+    };
+
+    const handleOpenLikesModal = async () => {
+        setShowLikesModal(true);
+        setLoadingLikes(true);
+        try {
+            const res = await axios.get(`${API_URL}/api/products/${id}/likes`);
+            setLikesList(res.data);
+        } catch (error) {
+            console.error('Error fetching likes:', error);
+            toast.error('Error al cargar la lista de Me Gusta');
+        } finally {
+            setLoadingLikes(false);
+        }
+    };
+
     const handleQuestionSubmit = async (e) => {
         e.preventDefault();
         if (!user) {
@@ -97,7 +164,7 @@ const ProductDetail = () => {
             const token = localStorage.getItem('token');
             const res = await axios.post(`${API_URL}/api/questions`, {
                 productId: product.id,
-                question: question
+                content: question
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -210,7 +277,28 @@ const ProductDetail = () => {
 
                 {/* Info Section */}
                 <div>
-                    <h1 style={{ fontSize: '1.8rem', marginBottom: '1rem', fontWeight: '500' }}>{product.name}</h1>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                        <h1 style={{ fontSize: '1.8rem', marginBottom: '1rem', fontWeight: '500', flex: 1 }}>{product.name}</h1>
+                        <button
+                            onClick={handleLike}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '5px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '5px'
+                            }}
+                        >
+                            <Heart
+                                size={28}
+                                color={liked ? '#ff4d4d' : '#999'}
+                                fill={liked ? '#ff4d4d' : 'none'}
+                                style={{ transition: 'all 0.2s' }}
+                            />
+                        </button>
+                    </div>
 
                     <div style={{ marginBottom: '2rem' }}>
                         <span style={{ fontSize: '2.5rem', fontWeight: '300' }}>
@@ -273,11 +361,21 @@ const ProductDetail = () => {
                         <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #eee', fontSize: '0.9rem', color: '#666' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '5px' }}>
                                 <Eye size={18} />
-                                <span style={{ fontWeight: 'bold' }}>{product.stats.total} Visitas</span>
+                                <span style={{ fontWeight: 'bold' }}>{product.stats.visits.total} Visitas</span>
                             </div>
-                            <div style={{ paddingLeft: '23px', fontSize: '0.8rem' }}>
-                                {product.stats.users} usuarios registrados <br />
-                                {product.stats.guests} visitantes
+                            <div style={{ paddingLeft: '23px', fontSize: '0.8rem', marginBottom: '10px' }}>
+                                {product.stats.visits.users} usuarios registrados <br />
+                                {product.stats.visits.guests} visitantes
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '5px' }}>
+                                <Heart size={18} />
+                                <span
+                                    style={{ fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline' }}
+                                    onClick={handleOpenLikesModal}
+                                >
+                                    {likesCount} Me gusta
+                                </span>
                             </div>
                         </div>
                     )}
@@ -318,7 +416,8 @@ const ProductDetail = () => {
                                 <div key={q.id}>
                                     <div style={{ display: 'flex', gap: '10px', marginBottom: '5px' }}>
                                         <MessageCircle size={16} color="#999" />
-                                        <p style={{ fontSize: '0.95rem', color: '#333' }}>{q.question}</p>
+                                        <span style={{ fontWeight: 'bold', fontSize: '0.9rem', marginRight: '5px' }}>{q.user?.username || 'Anónimo'}:</span>
+                                        <p style={{ fontSize: '0.95rem', color: '#333', margin: 0 }}>{q.content}</p>
                                     </div>
                                     {q.answer && (
                                         <div style={{ display: 'flex', gap: '10px', paddingLeft: '26px', opacity: 0.8 }}>
@@ -448,6 +547,83 @@ const ProductDetail = () => {
                         <ChevronRight size={32} />
                     </button>
 
+                </div>
+            )}
+
+            {/* Likes List Modal */}
+            {showLikesModal && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        zIndex: 2000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                    onClick={() => setShowLikesModal(false)}
+                >
+                    <div
+                        style={{
+                            background: 'white',
+                            padding: '20px',
+                            borderRadius: '8px',
+                            width: '400px',
+                            maxWidth: '90%',
+                            maxHeight: '80vh',
+                            overflowY: 'auto'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                            <h3 style={{ margin: 0 }}>A quiénes les gustó</h3>
+                            <button onClick={() => setShowLikesModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {loadingLikes ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}><Spinner /></div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                {likesList.length === 0 ? (
+                                    <p style={{ textAlign: 'center', color: '#666' }}>Aún no hay Me Gusta.</p>
+                                ) : (
+                                    likesList.map((like, index) => (
+                                        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            {like.user ? (
+                                                <>
+                                                    {like.user.avatar ? (
+                                                        <img
+                                                            src={getImageSrc(like.user.avatar)}
+                                                            alt={like.user.username}
+                                                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                                                        />
+                                                    ) : (
+                                                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            <User size={20} color="#666" />
+                                                        </div>
+                                                    )}
+                                                    <span style={{ fontWeight: '500' }}>{like.user.username}</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <User size={20} color="#666" />
+                                                    </div>
+                                                    <span style={{ color: '#666', fontStyle: 'italic' }}>Visitante</span>
+                                                </>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
         </div>
