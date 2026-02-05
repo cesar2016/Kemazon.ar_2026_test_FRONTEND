@@ -18,6 +18,7 @@ import Messages from './pages/Messages';
 import MySales from './pages/MySales';
 import AdminPanel from './pages/AdminPanel'; // New Import
 import ProtectedAdminRoute from './components/ProtectedAdminRoute'; // New Import
+import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { Toaster } from 'sonner';
@@ -35,19 +36,24 @@ function App() {
               <Route path="/product/:idSlug" element={<ProductDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/verify/:token" element={<VerifyAccount />} /> {/* New Route */}
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/create-product" element={<CreateProduct />} />
-              <Route path="/my-products" element={<MyProducts />} />
-              <Route path="/edit-product/:id" element={<EditProduct />} />
-              <Route path="/profile" element={<EditProfile />} />
+              <Route path="/verify/:token" element={<VerifyAccount />} />
+
+              {/* Protected Routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/create-product" element={<CreateProduct />} />
+                <Route path="/my-products" element={<MyProducts />} />
+                <Route path="/edit-product/:id" element={<EditProduct />} />
+                <Route path="/profile" element={<EditProfile />} />
+                <Route path="/my-purchases" element={<MyPurchases />} />
+                <Route path="/my-sales" element={<MySales />} />
+                <Route path="/messages" element={<Messages />} />
+              </Route>
+
               <Route path="/cart" element={<Cart />} />
               <Route path="/success" element={<Success />} />
-              <Route path="/failure" element={<Success />} /> {/* Re-use success page logic to handle failure status display */}
+              <Route path="/failure" element={<Success />} />
               <Route path="/pending" element={<Success />} />
-              <Route path="/my-purchases" element={<MyPurchases />} />
-              <Route path="/my-sales" element={<MySales />} />
-              <Route path="/messages" element={<Messages />} />
 
               {/* Admin Routes */}
               <Route element={<ProtectedAdminRoute />}>

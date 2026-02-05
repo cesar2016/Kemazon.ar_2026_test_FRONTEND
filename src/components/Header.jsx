@@ -110,10 +110,10 @@ const NavLinks = ({ user, cartCount, avatarUrl, logout, isMobile = false, closeM
                         </Link>
                     </li>
                     <li>
-                        <button onClick={() => { logout(); closeMenu(); }} style={{ ...linkStyle, background: 'transparent', border: 'none', cursor: 'pointer', width: '100%', justifyContent: isMobile ? 'flex-start' : 'center' }} title="Cerrar Sessión">
+                        <Link to="/" onClick={() => { logout(); closeMenu(); }} style={{ ...linkStyle, background: 'transparent', border: 'none', cursor: 'pointer', width: '100%', justifyContent: isMobile ? 'flex-start' : 'center', display: 'flex' }} title="Cerrar Sessión">
                             <LogOut size={isMobile ? 24 : 18} />
                             <span>Salir</span>
-                        </button>
+                        </Link>
                     </li>
                 </>
             ) : (
