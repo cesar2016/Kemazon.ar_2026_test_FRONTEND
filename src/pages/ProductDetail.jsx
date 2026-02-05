@@ -56,38 +56,22 @@ const ProductDetail = () => {
             <div className="grid-responsive" style={{ background: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '2rem', display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
 
                 {/* Images Section */}
-                <div>
-                    <div style={{
-                        marginBottom: '1rem',
-                        border: '1px solid #eee',
-                        borderRadius: '8px',
-                        overflow: 'hidden',
-                        height: '500px',
-                        width: '100%',
-                        backgroundColor: '#fff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <img
-                            src={selectedImage ? `${API_URL}${selectedImage}` : 'https://via.placeholder.com/500?text=No+Image'}
-                            alt={product.name}
-                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                        />
-                    </div>
+                <div style={{ display: 'flex', gap: '15px' }}>
+                    {/* Thumbnails Column - Left side */}
                     {product.images && product.images.length > 1 && (
-                        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '500px', overflowY: 'auto' }}>
                             {product.images.map((img, index) => (
                                 <div
                                     key={index}
-                                    onClick={() => setSelectedImage(img)}
+                                    onMouseEnter={() => setSelectedImage(img)}
                                     style={{
-                                        width: '80px',
-                                        height: '80px',
+                                        width: '60px',
+                                        height: '60px',
                                         border: selectedImage === img ? '2px solid var(--primary-red)' : '1px solid #eee',
                                         borderRadius: '4px',
                                         cursor: 'pointer',
-                                        overflow: 'hidden'
+                                        overflow: 'hidden',
+                                        flexShrink: 0
                                     }}
                                 >
                                     <img
@@ -99,6 +83,27 @@ const ProductDetail = () => {
                             ))}
                         </div>
                     )}
+
+                    {/* Main Image Container */}
+                    <div style={{
+                        flex: 1,
+                        border: '1px solid #eee',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        height: '500px',
+                        width: '100%',
+                        backgroundColor: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative'
+                    }}>
+                        <img
+                            src={selectedImage ? `${API_URL}${selectedImage}` : 'https://via.placeholder.com/500?text=No+Image'}
+                            alt={product.name}
+                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                        />
+                    </div>
                 </div>
 
                 {/* Info Section */}
