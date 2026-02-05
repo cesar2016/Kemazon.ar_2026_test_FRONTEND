@@ -4,7 +4,7 @@ import API_URL from '../config/api';
 
 const ProductCard = ({ product }) => {
     const imageUrl = product.images && product.images.length > 0
-        ? `${API_URL}${product.images[0]}`
+        ? (product.images[0].startsWith('http') ? product.images[0] : `${API_URL}${product.images[0]}`)
         : 'https://via.placeholder.com/300?text=No+Image';
 
     const createSlug = (name) => {

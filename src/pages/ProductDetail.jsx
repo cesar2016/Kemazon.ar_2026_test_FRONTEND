@@ -1,13 +1,14 @@
 import { useState, useEffect, useContext } from 'react';
 import { CartContext } from '../context/CartContext';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ShieldCheck, Truck, RotateCcw, MessageCircle, Send, Share2, ArrowLeft, Trophy } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, MessageCircle, Send, Share2, ArrowLeft, Trophy, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Spinner from '../components/Spinner';
 import API_URL from '../config/api';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'sonner';
 import ArrangeWithSeller from '../components/ArrangeWithSeller';
+import SocialShare from '../components/SocialShare';
 
 const ProductDetail = () => {
     const { addToCart } = useContext(CartContext);
@@ -16,6 +17,16 @@ const ProductDetail = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(null);
+    const navigate = useNavigate();
+
+    // Gallery State
+    const [showGallery, setShowGallery] = useState(false);
+    const [galleryIndex, setGalleryIndex] = useState(0);
+
+    const { user } = useContext(AuthContext);
+    const [question, setQuestion] = useState('');
+    const [questions, setQuestions] = useState([]);
+    const [showArrangeModal, setShowArrangeModal] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -25,15 +36,74 @@ const ProductDetail = () => {
                 if (res.data.images && res.data.images.length > 0) {
                     setSelectedImage(res.data.images[0]);
                 }
+
+                // Fetch questions
+                try {
+                    const qRes = await axios.get(`${API_URL}/api/questions/product/${id}`);
+                    setQuestions(qRes.data);
+                } catch (qErr) {
+                    console.error('Error fetching questions');
+                }
+
             } catch (err) {
                 console.error('Error fetching product:', err);
+                toast.error('Error al cargar el producto');
+                navigate('/');
             } finally {
                 setLoading(false);
             }
         };
 
         fetchProduct();
-    }, [id]);
+    }, [id, navigate]);
+
+    const handleQuestionSubmit = async (e) => {
+        e.preventDefault();
+        if (!user) {
+            toast.error('Debes iniciar sesión para preguntar');
+            return;
+        }
+        if (!question.trim()) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${API_URL}/api/questions`, {
+                productId: product.id,
+                question: question
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setQuestions([res.data, ...questions]);
+            setQuestion('');
+            toast.success('Pregunta enviada');
+        } catch (error) {
+            toast.error('Error al enviar pregunta');
+        }
+    };
+
+    // Gallery Logic
+    const openGallery = () => {
+        if (!product.images || product.images.length === 0) return;
+        // Find index of currently selected image
+        const idx = product.images.findIndex(img => img === selectedImage);
+        setGalleryIndex(idx !== -1 ? idx : 0);
+        setShowGallery(true);
+    };
+
+    const nextImage = (e) => {
+        e.stopPropagation();
+        setGalleryIndex((prev) => (prev + 1) % product.images.length);
+    };
+
+    const prevImage = (e) => {
+        e.stopPropagation();
+        setGalleryIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
+    };
+
+    const getImageSrc = (path) => {
+        if (!path) return '';
+        return path.startsWith('http') ? path : `${API_URL}${path}`;
+    };
 
     if (loading) {
         return (
@@ -75,7 +145,7 @@ const ProductDetail = () => {
                                     }}
                                 >
                                     <img
-                                        src={`${API_URL}${img}`}
+                                        src={getImageSrc(img)}
                                         alt={`Thumb ${index}`}
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                     />
@@ -85,21 +155,25 @@ const ProductDetail = () => {
                     )}
 
                     {/* Main Image Container */}
-                    <div style={{
-                        flex: 1,
-                        border: '1px solid #eee',
-                        borderRadius: '8px',
-                        overflow: 'hidden',
-                        height: '500px',
-                        width: '100%',
-                        backgroundColor: '#fff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        position: 'relative'
-                    }}>
+                    <div
+                        onClick={openGallery}
+                        style={{
+                            flex: 1,
+                            border: '1px solid #eee',
+                            borderRadius: '8px',
+                            overflow: 'hidden',
+                            height: '500px',
+                            width: '100%',
+                            backgroundColor: '#fff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            position: 'relative',
+                            cursor: 'zoom-in'
+                        }}
+                    >
                         <img
-                            src={selectedImage ? `${API_URL}${selectedImage}` : 'https://via.placeholder.com/500?text=No+Image'}
+                            src={selectedImage ? getImageSrc(selectedImage) : 'https://via.placeholder.com/500?text=No+Image'}
                             alt={product.name}
                             style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                         />
@@ -118,276 +192,222 @@ const ProductDetail = () => {
                     </div>
 
                     <p style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#00a650', fontWeight: '600', marginBottom: '1rem' }}>
-                        <Truck size={20} /> Llega gratis mañana
+                        Llega gratis mañana <Truck size={20} />
                     </p>
 
-                    <p style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#333', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
-                        <ShieldCheck size={16} color="#00a650" />
-                        Compra Protegida
-                    </p>
-                    <p style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#333', fontSize: '0.9rem', marginBottom: '2rem' }}>
-                        <Trophy size={16} color="#00a650" />
-                        MercadoPuntos
-                    </p>
-
-                    {/* Payment Options */}
-                    {product.user?.paymentMethods?.some(pm => pm.provider === 'MERCADOPAGO') ? (
-                        <button
-                            onClick={async () => {
-                                if (!user) {
-                                    toast.error('Inicia sesión para comprar');
-                                    return;
-                                }
-                                try {
-                                    const token = localStorage.getItem('token');
-                                    const res = await axios.post(`${API_URL}/api/payment/create_preference`, {
-                                        productId: product.id,
-                                        title: product.name,
-                                        price: product.price,
-                                        quantity: 1,
-                                        picture_url: product.images && product.images.length > 0 ? `${API_URL}${product.images[0]}` : ''
-                                    }, {
-                                        headers: { Authorization: `Bearer ${token}` }
-                                    });
-                                    window.location.href = res.data.init_point;
-                                } catch (error) {
-                                    console.error(error);
-                                    if (error.response && error.response.status === 400) {
-                                        toast.error(error.response.data.msg || 'Error al iniciar el pago');
-                                    } else {
-                                        toast.error('Error al iniciar el pago');
-                                    }
-                                }
-                            }}
-                            className="btn btn-primary"
-                            style={{ width: '100%', marginBottom: '1rem', padding: '1rem', backgroundColor: '#009ee3', borderColor: '#009ee3' }}
-                        >
-                            Comprar con MercadoPago
-                        </button>
-                    ) : null}
-
-                    <button
-                        onClick={() => addToCart(product)}
-                        className="btn btn-outline"
-                        style={{ width: '100%', padding: '1rem', background: '#e6f7ee', border: 'none', color: '#00a650', marginBottom: '1rem' }}
-                    >
-                        Agregar al carrito
-                    </button>
-
-                    <ArrangeWithSeller product={product} />
-
-                    {/* Social Share */}
-                    <div style={{ marginTop: '2rem' }}>
-                        <p style={{ fontSize: '0.9rem', fontWeight: '500', marginBottom: '10px', color: '#666' }}>Compartir con amigos:</p>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            {/* WhatsApp */}
-                            <button
-                                onClick={() => {
-                                    const shareUrl = `${API_URL}/social/share/${id}`;
-                                    const text = `¡Mira este producto en Kemazon! ${shareUrl}`;
-                                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
-                                }}
-                                title="Compartir en WhatsApp"
-                                style={{ width: '40px', height: '40px', borderRadius: '50%', border: 'none', background: '#25D366', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                            </button>
-
-                            {/* Facebook */}
-                            <button
-                                onClick={() => {
-                                    const shareUrl = `${API_URL}/social/share/${id}`;
-                                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
-                                }}
-                                title="Compartir en Facebook"
-                                style={{ width: '40px', height: '40px', borderRadius: '50%', border: 'none', background: '#1877F2', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-                            </button>
-
-                            {/* Instagram (Copy Link) */}
-                            <button
-                                onClick={() => {
-                                    const shareUrl = `${API_URL}/social/share/${id}`;
-                                    navigator.clipboard.writeText(shareUrl);
-                                    toast.success('Enlace viral copiado para Instagram');
-                                    window.open('https://instagram.com', '_blank');
-                                }}
-                                title="Copiar enlace para Instagram"
-                                style={{ width: '40px', height: '40px', borderRadius: '50%', border: 'none', background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                            </button>
-
-                            {/* TikTok (Copy Link) */}
-                            <button
-                                onClick={() => {
-                                    const shareUrl = `${API_URL}/social/share/${id}`;
-                                    navigator.clipboard.writeText(shareUrl);
-                                    toast.success('Enlace viral copiado para TikTok');
-                                    window.open('https://tiktok.com', '_blank');
-                                }}
-                                title="Copiar enlace para TikTok"
-                                style={{ width: '40px', height: '40px', borderRadius: '50%', border: 'none', background: '#000000', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path></svg>
-                            </button>
-                        </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2rem', color: '#333' }}>
+                        <RotateCcw size={20} color="#00a650" />
+                        <span>Devolución gratis.</span>
+                        <span style={{ color: '#999' }}>Tenés 30 días desde que lo recibís.</span>
                     </div>
 
-                    <p style={{ color: '#999', fontSize: '0.9rem', marginTop: '2rem' }}>Vendido por: <strong>{product.user?.username || 'Vendedor'}</strong></p>
+                    <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
+                        {user?.id !== product.userId ? (
+                            <>
+                                <button className="btn btn-primary" onClick={() => addToCart(product)} style={{ width: '100%', padding: '1rem' }}>
+                                    Agregar al carrito
+                                </button>
+                                <button
+                                    className="btn btn-outline"
+                                    onClick={() => setShowArrangeModal(true)}
+                                    style={{ width: '100%', padding: '1rem', borderColor: '#3483fa', color: '#3483fa', background: '#e1f5fe' }}
+                                >
+                                    Acordar con el vendedor
+                                </button>
+                            </>
+                        ) : (
+                            <div style={{ padding: '1rem', background: '#f5f5f5', borderRadius: '8px', textAlign: 'center', color: '#666' }}>
+                                Esta es tu publicación
+                            </div>
+                        )}
+                    </div>
+                    {/* Social Share Component */}
+                    <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #eee' }}>
+                        <SocialShare
+                            url={window.location.href}
+                            title={`¡Mirá este producto! ${product.name} a $${product.price}`}
+                        />
+                    </div>
+
+                    <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', fontSize: '0.9rem', color: '#666' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <ShieldCheck size={18} color="#666" />
+                            <span>Compra Protegida</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <Trophy size={18} color="#666" />
+                            <span>MercadoPuntos</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* Full Width Sections */}
-            <div style={{ marginTop: '3rem', background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>Descripción</h3>
-                <p style={{ color: '#666', whiteSpace: 'pre-line', lineHeight: '1.6', fontSize: '1.1rem' }}>
-                    {product.description || 'Sin descripción.'}
-                </p>
+            {/* Description & Questions */}
+            <div style={{ marginTop: '3rem', display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+                <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                    <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>Descripción</h3>
+                    <p style={{ whiteSpace: 'pre-line', lineHeight: '1.6', color: '#666' }}>
+                        {product.description || 'Sin descripción.'}
+                    </p>
+                </div>
 
-                <hr style={{ margin: '3rem 0', border: 'none', borderTop: '1px solid #eee' }} />
+                <div style={{ background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+                    <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Preguntas</h3>
 
-                <QuestionsSection productId={id} productUserId={product.userId} />
-            </div>
-        </div>
-    );
-};
+                    <form onSubmit={handleQuestionSubmit} style={{ marginBottom: '2rem', display: 'flex', gap: '10px' }}>
+                        <input
+                            type="text"
+                            placeholder="Escribí tu pregunta..."
+                            className="form-control"
+                            value={question}
+                            onChange={(e) => setQuestion(e.target.value)}
+                            style={{ flex: 1 }}
+                        />
+                        <button type="submit" className="btn btn-primary" style={{ padding: '0 1.5rem' }}>
+                            Preguntar
+                        </button>
+                    </form>
 
-// Sub-component for Questions to keep main component cleaner
-const QuestionsSection = ({ productId, productUserId }) => {
-    const { user } = useContext(AuthContext); // Import AuthContext at top level if needed, or pass user prop
-    const [questions, setQuestions] = useState([]);
-    const [newQuestion, setNewQuestion] = useState('');
-    const [answerText, setAnswerText] = useState('');
-    const [answeringId, setAnsweringId] = useState(null);
-
-    // Refresh questions
-    const fetchQuestions = async () => {
-        try {
-            const res = await axios.get(`${API_URL}/api/questions/${productId}`);
-            setQuestions(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    useEffect(() => {
-        fetchQuestions();
-    }, [productId]);
-
-    const handleAsk = async (e) => {
-        e.preventDefault();
-        if (!newQuestion.trim()) return;
-        const token = localStorage.getItem('token');
-        if (!token) {
-            toast.error('Debes iniciar sesión para preguntar');
-            return;
-        }
-
-        try {
-            await axios.post(`${API_URL}/api/questions`, {
-                productId,
-                content: newQuestion
-            }, {
-                headers: {
-                    'x-auth-token': token
-                }
-            });
-            setNewQuestion('');
-            toast.success('Pregunta enviada');
-            fetchQuestions();
-        } catch (err) {
-            toast.error('Error al enviar pregunta');
-        }
-    };
-
-    const handleAnswer = async (questionId) => {
-        if (!answerText.trim()) return;
-        const token = localStorage.getItem('token');
-
-        try {
-            await axios.put(`${API_URL}/api/questions/${questionId}/answer`, {
-                answer: answerText
-            }, {
-                headers: {
-                    'x-auth-token': token
-                }
-            });
-            setAnswerText('');
-            setAnsweringId(null);
-            toast.success('Respuesta enviada');
-            fetchQuestions();
-        } catch (err) {
-            toast.error('Error al responder');
-        }
-    };
-
-    const isOwner = user && user.id === productUserId;
-
-    return (
-        <div style={{ marginTop: '2rem' }}>
-            <h3 style={{ fontSize: '1.2rem', marginBottom: '1.5rem' }}>Preguntas y respuestas</h3>
-
-            {/* Ask Form */}
-            {user && !isOwner && (
-                <form onSubmit={handleAsk} style={{ marginBottom: '2rem', display: 'flex', gap: '10px' }}>
-                    <input
-                        type="text"
-                        placeholder="Escribe una pregunta..."
-                        value={newQuestion}
-                        onChange={(e) => setNewQuestion(e.target.value)}
-                        style={{ flex: 1, padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                    <button type="submit" className="btn btn-primary" style={{ padding: '0 20px' }}>Preguntar</button>
-                </form>
-            )}
-
-            {/* Questions List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                {questions.map((q) => (
-                    <div key={q.id}>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '4px' }}>
-                            <span style={{ fontWeight: '500', fontSize: '0.95rem' }}>{q.content}</span>
-                        </div>
-
-                        {q.answer ? (
-                            <div style={{ marginLeft: '1rem', marginTop: '5px', color: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ccc' }}></div>
-                                <span style={{ fontSize: '0.9rem' }}>{q.answer}</span>
-                                {/* <span style={{ fontSize: '0.8rem', color: '#999' }}>{new Date(q.createdAt).toLocaleDateString()}</span> */}
-                            </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        {questions.length === 0 ? (
+                            <p style={{ color: '#999', fontStyle: 'italic' }}>Nadie ha preguntado todavía.</p>
                         ) : (
-                            isOwner && (
-                                <div style={{ marginTop: '10px', marginLeft: '1rem' }}>
-                                    {answeringId === q.id ? (
-                                        <div style={{ display: 'flex', gap: '10px' }}>
-                                            <input
-                                                type="text"
-                                                autoFocus
-                                                placeholder="Escribe tu respuesta..."
-                                                value={answerText}
-                                                onChange={(e) => setAnswerText(e.target.value)}
-                                                style={{ flex: 1, padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                                            />
-                                            <button onClick={() => handleAnswer(q.id)} className="btn btn-primary" style={{ padding: '0 15px', fontSize: '0.9rem' }}>Enviar</button>
-                                            <button onClick={() => setAnsweringId(null)} style={{ border: 'none', background: 'transparent', color: '#666', cursor: 'pointer' }}>Cancelar</button>
+                            questions.map(q => (
+                                <div key={q.id}>
+                                    <div style={{ display: 'flex', gap: '10px', marginBottom: '5px' }}>
+                                        <MessageCircle size={16} color="#999" />
+                                        <p style={{ fontSize: '0.95rem', color: '#333' }}>{q.question}</p>
+                                    </div>
+                                    {q.answer && (
+                                        <div style={{ display: 'flex', gap: '10px', paddingLeft: '26px', opacity: 0.8 }}>
+                                            <div style={{ transform: 'scaleX(-1)' }}><MessageCircle size={16} color="#999" /></div>
+                                            <p style={{ fontSize: '0.9rem', color: '#666' }}>{q.answer}</p>
                                         </div>
-                                    ) : (
-                                        <button onClick={() => setAnsweringId(q.id)} style={{ color: '#00a650', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '0.9rem', padding: 0 }}>
-                                            Responder
-                                        </button>
                                     )}
                                 </div>
-                            )
+                            ))
                         )}
-                        <div style={{ fontSize: '0.8rem', color: '#ccc', marginTop: '4px', marginLeft: '1rem' }}>
-                            Usuario: {q.user.username}
-                        </div>
                     </div>
-                ))}
-                {questions.length === 0 && <p style={{ color: '#999', fontStyle: 'italic' }}>Nadie ha preguntado todavía. ¡Sé el primero!</p>}
+                </div>
             </div>
+
+            {/* Arrange With Seller Modal */}
+            {showArrangeModal && (
+                <ArrangeWithSeller
+                    product={product}
+                    seller={product.user}
+                    onClose={() => setShowArrangeModal(false)}
+                />
+            )}
+
+            {/* Full Screen Image Gallery Modal */}
+            {showGallery && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(0,0,0,0.9)',
+                        zIndex: 2000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        userSelect: 'none'
+                    }}
+                    onClick={() => setShowGallery(false)}
+                >
+                    {/* Close Button */}
+                    <button
+                        onClick={() => setShowGallery(false)}
+                        style={{
+                            position: 'absolute',
+                            top: '20px',
+                            right: '20px',
+                            background: 'none',
+                            border: 'none',
+                            color: 'white',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <X size={32} />
+                    </button>
+
+                    {/* Counter */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '20px',
+                        left: '20px',
+                        color: 'white',
+                        fontSize: '1.2rem'
+                    }}>
+                        {galleryIndex + 1} / {product.images.length}
+                    </div>
+
+                    {/* Prev Button */}
+                    <button
+                        onClick={prevImage}
+                        style={{
+                            position: 'absolute',
+                            left: '20px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '50px',
+                            height: '50px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            cursor: 'pointer',
+                            transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                    >
+                        <ChevronLeft size={32} />
+                    </button>
+
+                    {/* Image */}
+                    <img
+                        src={getImageSrc(product.images[galleryIndex])}
+                        alt={`Gallery ${galleryIndex}`}
+                        onClick={(e) => e.stopPropagation()} // Prevent close on image click
+                        style={{
+                            maxWidth: '90%',
+                            maxHeight: '90%',
+                            objectFit: 'contain',
+                            boxShadow: '0 0 20px rgba(0,0,0,0.5)'
+                        }}
+                    />
+
+                    {/* Next Button */}
+                    <button
+                        onClick={nextImage}
+                        style={{
+                            position: 'absolute',
+                            right: '20px',
+                            background: 'rgba(255,255,255,0.1)',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '50px',
+                            height: '50px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            cursor: 'pointer',
+                            transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                    >
+                        <ChevronRight size={32} />
+                    </button>
+
+                </div>
+            )}
         </div>
     );
 };

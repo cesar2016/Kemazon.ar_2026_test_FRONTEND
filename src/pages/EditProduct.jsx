@@ -49,7 +49,7 @@ const EditProduct = () => {
                 const loadedItems = (res.data.images || []).map((img, i) => ({
                     id: `existing-${i}-${Date.now()}`,
                     type: 'existing',
-                    url: `${API_URL}${img}`, // Full URL for display
+                    url: img.startsWith('http') ? img : `${API_URL}${img}`, // Full URL for display
                     serverPath: img // Path needed for backend
                 }));
                 setItems(loadedItems);

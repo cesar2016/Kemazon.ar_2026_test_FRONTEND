@@ -2,7 +2,7 @@ import { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Plus, Image as ImageIcon, X } from 'lucide-react';
+import { Plus, Image as ImageIcon, X, Upload, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import API_URL from '../config/api';
 import Spinner from '../components/Spinner';

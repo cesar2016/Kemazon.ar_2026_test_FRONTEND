@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
 import Spinner from '../components/Spinner';
 import API_URL from '../config/api';
 
 const Home = () => {
+    const { user } = useContext(AuthContext);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -33,10 +35,12 @@ const Home = () => {
                 <p className="fade-in" style={{ fontSize: '1.2rem', marginBottom: '2rem', color: 'var(--text-light)' }}>
                     Compra y vende lo que quieras.
                 </p>
-                <div className="fade-in" style={{ animationDelay: '0.2s' }}>
-                    <Link to="/register" className="btn btn-primary" style={{ marginRight: '1rem' }}>Comenzar a vender</Link>
-                    <Link to="/login" className="btn btn-outline">Ingresar</Link>
-                </div>
+                {!user && (
+                    <div className="fade-in" style={{ animationDelay: '0.2s' }}>
+                        <Link to="/register" className="btn btn-primary" style={{ marginRight: '1rem' }}>Comenzar a vender</Link>
+                        <Link to="/login" className="btn btn-outline">Ingresar</Link>
+                    </div>
+                )}
             </div>
 
             <div>
